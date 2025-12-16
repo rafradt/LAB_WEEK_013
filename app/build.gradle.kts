@@ -57,6 +57,9 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt (libs.androidx.room.compiler)
 
     // Lifecycle
     implementation(libs.lifecycle.viewmodel.ktx)
