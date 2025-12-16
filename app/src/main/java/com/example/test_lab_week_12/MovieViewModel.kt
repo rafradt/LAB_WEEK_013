@@ -14,16 +14,13 @@ class MovieViewModel(
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
     private val _error = MutableStateFlow("")
 
-    // ✅ FILTER & SORT DI SINI
     val popularMovies: StateFlow<List<Movie>> =
         _movies
-            .map { movies ->
-                movies.sortedByDescending { it.popularity }
-            }
+            .map { it.sortedByDescending { movie -> movie.popularity } }
             .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList()
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                emptyList()
             )
 
     val error: StateFlow<String> = _error
@@ -35,12 +32,8 @@ class MovieViewModel(
     private fun fetchPopularMovies() {
         viewModelScope.launch(Dispatchers.IO) {
             movieRepository.fetchMovies()
-                .catch { e ->
-                    _error.value = "An exception occurred: ${e.message}"
-                }
-                .collect { movies ->
-                    _movies.value = movies
-                }
+                .catch { _error.value = it.message ?: "Unknown error" }
+                .collect { _movies.value = it }
         }
     }
 }

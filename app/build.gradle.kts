@@ -7,8 +7,7 @@ plugins {
 android {
     namespace = "com.example.test_lab_week_12"
 
-    // WAJIB karena RecyclerView 1.4.0
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.test_lab_week_12"
@@ -29,6 +28,10 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+
+    buildFeatures{
+        dataBinding = true
     }
 
     compileOptions {

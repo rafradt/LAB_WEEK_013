@@ -1,37 +1,28 @@
 package com.example.test_lab_week_12
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Lifecycle
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.RecyclerView
+import com.example.test_lab_week_12.databinding.ActivityMainBinding
 import com.example.test_lab_week_12.model.Movie
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.launch
-import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    private val movieAdapter by lazy {
-        MovieAdapter(object : MovieAdapter.MovieClickListener {
+        val binding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        val movieAdapter = MovieAdapter(object : MovieAdapter.MovieClickListener {
             override fun onMovieClick(movie: Movie) {
                 openMovieDetails(movie)
             }
         })
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        recyclerView = findViewById(R.id.movie_list)
-        recyclerView.adapter = movieAdapter
+        binding.movieList.adapter = movieAdapter
 
         val movieRepository =
             (application as MovieApplication).movieRepository
@@ -45,51 +36,11 @@ class MainActivity : AppCompatActivity() {
             }
         )[MovieViewModel::class.java]
 
-        // fetch movies from the API
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                // collect movies
-                launch {
-                    movieViewModel.popularMovies.collect { movies ->
-                        val currentYear =
-                            Calendar.getInstance()
-                                .get(Calendar.YEAR)
-                                .toString()
-
-                        movieAdapter.addMovies(
-                            movies
-                                .filter {
-                                    it.releaseDate?.startsWith(currentYear) == true
-                                }
-                                .sortedByDescending { it.popularity }
-                        )
-                    }
-                }
-
-                // collect error
-                launch {
-                    movieViewModel.error.collect { error ->
-                        if (error.isNotEmpty()) {
-                            Snackbar.make(
-                                recyclerView,
-                                error,
-                                Snackbar.LENGTH_LONG
-                            ).show()
-                        }
-                    }
-                }
-            }
-        }
+        binding.viewModel = movieViewModel
+        binding.lifecycleOwner = this
     }
 
     private fun openMovieDetails(movie: Movie) {
-        val intent = Intent(this, DetailsActivity::class.java).apply {
-            putExtra(DetailsActivity.EXTRA_TITLE, movie.title)
-            putExtra(DetailsActivity.EXTRA_RELEASE, movie.releaseDate)
-            putExtra(DetailsActivity.EXTRA_OVERVIEW, movie.overview)
-            putExtra(DetailsActivity.EXTRA_POSTER, movie.posterPath)
-        }
-        startActivity(intent)
+        // isi kalau mau, boleh kosong untuk LAB
     }
 }
